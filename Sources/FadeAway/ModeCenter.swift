@@ -11,4 +11,11 @@ final class ModeCenter {
     func applyFocus(_ mode: Mode) { state.applyFocus(mode); onChange?() }
     func pickManual(_ mode: Mode) { state.pickManual(mode); onChange?() }
     func pickAutomatic() { state.pickAutomatic(); onChange?() }
+
+    /// Called every tick. Fires `onChange` only when the auto reason changes.
+    func applyAuto(_ reason: AutoReason?) {
+        guard reason != state.autoReason else { return }
+        state.applyAuto(reason)
+        onChange?()
+    }
 }

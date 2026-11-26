@@ -39,4 +39,15 @@ final class StatusPresentationTests: XCTestCase {
         XCTAssertEqual(StatusPresentation.appSuffix(timeoutLabel: "1 minute", category: .work), "1 minute · Work")
         XCTAssertEqual(StatusPresentation.appSuffix(timeoutLabel: "default", category: .neutral), "default")
     }
+
+    func testAutoModeTitles() {
+        var s = ModeState()
+        s.applyFocus(.work)
+        s.applyAuto(.fullscreen)
+        XCTAssertEqual(StatusPresentation.modeTitle(s), "Mode: Presentation (auto: fullscreen)")
+        s.applyAuto(.screenSharing)
+        XCTAssertEqual(StatusPresentation.modeTitle(s), "Mode: Presentation (auto: screen sharing)")
+        s.pickManual(.focus)
+        XCTAssertEqual(StatusPresentation.modeTitle(s), "Mode: Focus (manual)")
+    }
 }

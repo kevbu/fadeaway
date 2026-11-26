@@ -10,6 +10,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private let defaults = UserDefaults.standard
     private var lastActive: [pid_t: Date] = [:]
     private var timer: Timer?
+    private let autoMonitor = AutoPresentationMonitor()
 
     private let choices: [(title: String, seconds: Int)] = [
         ("15 seconds", 15), ("30 seconds", 30), ("1 minute", 60),
@@ -43,6 +44,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     private var paused: Bool {
         get { defaults.bool(forKey: "paused") }
         set { defaults.set(newValue, forKey: "paused"); updateIcon() }
+    }
+
+    /// Default on. Turning it off ends an active auto presentation at once.
+    private var autoPresentation: Bool {
+        get { defaults.object(forKey: "autoPresentation") as? Bool ?? true }
+        set {
+            defaults.set(newValue, forKey: "autoPresentation")
+            if !newValue {
+                autoMonitor.reset()
+                ModeCenter.shared.applyAuto(nil)
+            }
+        }
     }
 
     private var activeMode: Mode { ModeCenter.shared.state.activeMode }
@@ -98,6 +111,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
 
     private func tick() {
         let now = Date()
+        if autoPresentation { ModeCenter.shared.applyAuto(autoMonitor.poll(now: now)) }
         let front = NSWorkspace.shared.frontmostApplication?.processIdentifier
         var alive = Set<pid_t>()
 
@@ -207,9 +221,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
             item.state = on ? .on : .off
             menu.addItem(item)
         }
-        add("Automatic (follow Focus)", nil, on: manual == nil)
+        add("Automatic", nil, on: manual == nil)
         menu.addItem(.separator())
         for m in Mode.allCases { add(m.title, m, on: manual == m) }
+        menu.addItem(.separator())
+        let auto = NSMenuItem(
+            title: "Switch to Presentation automatically", action: #selector(toggleAutoPresentation), keyEquivalent: "")
+        auto.target = self
+        auto.state = autoPresentation ? .on : .off
+        menu.addItem(auto)
         menu.addItem(.separator())
         let setup = NSMenuItem(title: "Set up Focus Filters…", action: #selector(openFocusSettings), keyEquivalent: "")
         setup.target = self
@@ -241,6 +261,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
     // MARK: Actions
 
     @objc private func togglePause() { paused.toggle() }
+
+    @objc private func toggleAutoPresentation() { autoPresentation.toggle() }
 
     @objc private func pickTimeout(_ sender: NSMenuItem) {
         guard let choice = sender.representedObject as? Choice else { return }
@@ -310,7 +332,7 @@ private final class Choice: NSObject {
     init(target: Target, seconds: Int?) { self.target = target; self.seconds = seconds }
 }
 
-/// mode nil = Automatic (follow Focus).
+/// mode nil = Automatic (auto presentation, then Focus).
 private final class ModeChoice: NSObject {
     let mode: Mode?
     init(mode: Mode?) { self.mode = mode }

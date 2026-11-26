@@ -7,6 +7,7 @@ macOS menu bar app that hides apps left in the background longer than a timeout.
 - Fast timeout: one global value (default 15 seconds) for apps the current mode hides faster
 - Focus modes: a FadeAway Focus Filter sets the mode when a macOS Focus turns on
 - Manual mode switch: menu ▸ Mode, for example "Presentation" right before a talk
+- Auto Presentation: switches to Presentation while an app is fullscreen or while you share your whole screen in Teams, Slack or Zoom
 - Pause, "Hide all others now", launch at login
 - Needs no Accessibility permission
 
@@ -22,6 +23,16 @@ macOS menu bar app that hides apps left in the background longer than a timeout.
 
 "Own timeout" is the per-app override if set, else the default timeout. The fast timeout never makes an app wait longer than its own timeout. An app set to "Never hide" never hides in any mode. Presentation pauses hiding without touching the "Pause hiding" switch.
 
+### Auto Presentation
+
+FadeAway switches to Presentation by itself while an app is fullscreen (for example a Keynote or PowerPoint slide show) or while you share your whole screen in Microsoft Teams, Slack or Zoom. It switches on after 2 seconds of a stable signal and back after 5 seconds without it. The menu then shows `Mode: Presentation (auto: fullscreen)` or `Mode: Presentation (auto: screen sharing)`.
+
+- Precedence: manual pick > Auto Presentation > Focus. When Auto Presentation starts, it ends an earlier manual pick. A manual pick made during Auto Presentation wins until the next start or Focus change.
+- Turn it off in menu ▸ Mode ▸ "Switch to Presentation automatically" (on by default). Turning it off ends an active Auto Presentation at once.
+- Sharing a single window instead of the whole screen is not detected.
+- With the menu bar set to "Always hide" (System Settings ▸ Control Center), a zoomed window that fills the screen counts as fullscreen. Auto Presentation then pauses hiding until you shrink the window or turn the switch off.
+- Needs no extra permission: FadeAway reads only window positions and owners, not window titles.
+
 ## Focus Filter setup
 
 1. Open the FadeAway menu ▸ Mode ▸ Set up Focus Filters… (or open System Settings ▸ Focus).
@@ -31,7 +42,7 @@ macOS menu bar app that hides apps left in the background longer than a timeout.
 
 When that Focus turns on, FadeAway switches to the chosen mode. When it turns off, FadeAway returns to Normal. The menu shows the current mode, for example `Mode: Work (from Focus)`.
 
-A pick in menu ▸ Mode overrides the Focus mode until you pick "Automatic (follow Focus)" or the Focus changes. The manual pick is not kept across restarts.
+A pick in menu ▸ Mode overrides the Focus mode until you pick "Automatic" or the Focus changes. The manual pick is not kept across restarts.
 
 FadeAway must have been launched at least once before System Settings lists the filter.
 
