@@ -1,2 +1,19 @@
-build/
+# Public repo: allowlist. Everything is ignored unless listed below.
+# To publish a new top-level file or folder, add a "!" line on purpose.
+/*
+
+!/.gitignore
+!/README.md
+!/CLAUDE.md
+!/Package.swift
+!/Info.plist
+!/build.sh
+!/Sources/
+!/Tests/
+
+# Never publish, even inside allowed folders
 .DS_Store
+*.local.*
+.env*
+*.p12
+*.mobileprovision
