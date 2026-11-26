@@ -5,6 +5,8 @@ public enum StatusPresentation {
         switch state.source {
         case .none: return title
         case .focus: return "\(title) (from Focus)"
+        case .auto(.fullscreen): return "\(title) (auto: fullscreen)"
+        case .auto(.screenSharing): return "\(title) (auto: screen sharing)"
         case .manual: return "\(title) (manual)"
         }
     }
